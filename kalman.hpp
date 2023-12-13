@@ -1,5 +1,6 @@
 #include <Eigen/Dense>
 #include <tuple>
+#include <vector>
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
@@ -43,14 +44,12 @@ class Kalman{
         const Measurements& Z;
         const LtiModel& M;
 
-        // Auxiliary matrices
         const MatrixXd I_n, I_m;
-        MatrixXd R_inv, A_bar, B_bar, Q_bar, Q_root, R_root;
+        const MatrixXd R_inv, A_bar, B_bar, Q_bar, Q_root, R_root;
 
-        Kalman(Measurements& Z, LtiModel& M);
+        Kalman(Measurements &Z, LtiModel &M);
 
-        std::tuple<VectorXd, MatrixXd, MatrixXd> kalmanUpdate(VectorXd& xf, MatrixXd& Pf_root, VectorXd& u, VectorXd& y);
+        std::tuple<VectorXd, VectorXd, MatrixXd> kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y);
 
-        void kf(Measurements &Z, LtiModel& M);
-
+        static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, LtiModel &M);
 };
