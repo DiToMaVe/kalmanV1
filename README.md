@@ -1,0 +1,64 @@
+% Square-root implementation of Kalman Filter/Smoother as per
+%
+% Gibson and Ninness, "RobustMaximum-Likelihood Estimation of Multivariable
+% Dynamic Systems", Automatica, , 41(10):1667?1682, October 2005.
+%
+% Model is assumed to be of the form,
+%
+% x(t+1) = A(t)x(t) + B(t)u(t) + w(t),   [w(t)]    (    [ Q(t)    S(t) ] )
+%                                        [    ] ~ N( 0, [              ] )
+%   y(t) = C(t)x(t) + D(t)u(t) + v(t),   [v(t)]    (    [ S^T(t)  R(t) ] )
+%
+% A call to this function should look like
+%
+%       G = rksqrtv(Z,M,OPT);
+%
+% Where
+%
+%             Z: the data structure containing the measured outputs in Z.y and 
+%                possibly the measured inputs in Z.u. If the number of data
+%                points is N, the number of outputs is p, and the number of
+%                inputs is m, then Z.y is an N x p matrix and Z.u is an N x m
+%                matrix.
+%
+%  M.ss.A,B,C,D: 3D time-varying system matrices; for each matrix, it is
+%                assumed that the time index is the third dimension, e.g.
+%                A(:,:,t) is the state transition matrix at time t
+%
+%    M.ss.Q,S,R: 3D time-varying covariance matrices for process and measurement 
+%                noise, respectively. Again, the third dimension is time
+%                dependent.
+%
+%    M.ss.X1,P1: Initial state mean (X1) and its covariance matrix (P1),
+%                respectively.
+%
+%             G: returned structure with the following fields
+%
+%          
+%          G.xp: predicted states, i.e. E[x(t) | y_1,..,y_{t-1}]
+%          G.xf: filtered states, i.e. E[x(t) | y_1,..,y_{t}]
+%          G.xs: smoothed states, i.e. E[x(t) | y_1,..,y_{N}]
+%
+%          G.Pp: squareroot of predicted state covariance matrix
+%                  Pp(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t-1}}
+%          G.Pf: squareroot of filtered state covariance matrix
+%                  Pf(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{t}}
+%          G.Ps: squareroot of smoothed state covariance matrix, i.e.
+%                  Ps(:,:,t) = E{x(t)*x(t)' |  y_1,..,y_{N}}
+%          G.Ms: cross covariance between x(t+1) and x(t), i.e.
+%                  Ms(:,:,t) = E{x(t+1)*x(t)' | y_1,..,y_{N}}
+%          
+%          G.yp: predicted output estimate
+%          G.yf: filtered output estimate
+%          G.ys: smoothed output estimate
+%          G.pe: prediction error
+%          G.fe: filter error
+%          G.se: smoother error
+%
+%          G.LL: negative log-likelihood
+%
+%
+%           OPT: a structure containing algorithm options. 
+% OPT.smoothing: if equal to 1, then smoothing will be performed in
+%                addition to filtering.
+%
