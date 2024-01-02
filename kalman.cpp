@@ -14,16 +14,16 @@ Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y)
 }
 
 LssModel::LssModel(
-	const Eigen::MatrixXd A,
-	const Eigen::MatrixXd B,
-	const Eigen::MatrixXd C,
-	const Eigen::MatrixXd D,
-	const Eigen::MatrixXd P,
-	const Eigen::MatrixXd Q,
-	const Eigen::MatrixXd R,
-	const Eigen::MatrixXd S,
-	const Eigen::VectorXd x0,
-	const Eigen::MatrixXd P0
+	const MatrixXd A,
+	const MatrixXd B,
+	const MatrixXd C,
+	const MatrixXd D,
+	const MatrixXd P,
+	const MatrixXd Q,
+	const MatrixXd R,
+	const MatrixXd S,
+	const VectorXd x0,
+	const MatrixXd P0
 )
 	: A(A), B(B), C(C), D(D), P(P), Q(Q), R(R), S(S), x0(x0), P0(P0)
 {
