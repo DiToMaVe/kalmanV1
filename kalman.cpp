@@ -11,7 +11,14 @@ Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y)
 	: U(U), Y(Y)
 {
 	// ToDo: Check on length N
+	std::cout << "Inside class Measurements." << std::endl;
+	std::cout << "Address U:" << U.data() << std::endl;
+    std::cout << "Address Y:" << Y.data() << std::endl;
+
 }
+
+Observations::Observations(MatrixXd& U, MatrixXd& Y): U_{&U}, Y_{&Y}{}
+
 
 LssModel::LssModel(
 	const MatrixXd A,
@@ -26,6 +33,25 @@ LssModel::LssModel(
 	const MatrixXd P0
 )
 	: A(A), B(B), C(C), D(D), P(P), Q(Q), R(R), S(S), x0(x0), P0(P0)
+{
+	n = A.rows();
+	p = B.cols();
+	m = C.rows();
+	// ToDo: Checks on dimensions 
+}
+
+LtissModel::LtissModel(
+	MatrixXd& A,
+	MatrixXd& B,
+	MatrixXd& C,
+	MatrixXd& D,
+	MatrixXd& P,
+	MatrixXd& Q,
+	MatrixXd& R,
+	MatrixXd& S,
+	VectorXd& x0,
+	MatrixXd& P0
+): A_(&A), B_(&B), C_(&C), D_(&D), P_(&P), Q_(&Q), R_(&R), S_(&S), x0_(&x0), P0_(&P0)
 {
 	n = A.rows();
 	p = B.cols();

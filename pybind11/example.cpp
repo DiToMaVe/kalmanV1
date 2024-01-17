@@ -37,7 +37,7 @@ PYBIND11_MODULE(example, m) {
                 static_cast<Scalar *>(info.ptr), info.shape[0], info.shape[1], strides);
 
             return Matrix(map);
-        }))
+                    }))
         .def_buffer([](Matrix &m) -> py::buffer_info {
             return py::buffer_info(
                 m.data(),                                /* Pointer to buffer */
@@ -49,6 +49,5 @@ PYBIND11_MODULE(example, m) {
                 sizeof(Scalar) * (rowMajor ? 1 : m.rows()) }
                                                         /* Strides (in bytes) for each index */
             );
-        })
-        .def("data", Matrix::data, "data()");       
+        });
 }
