@@ -161,20 +161,12 @@ class Kalman {
 		Observations* _Z;
 		LtissModel* _M;
 
-		MatrixXd _I_n, _I_m;
-		MatrixXd _A_bar;
-		MatrixXd _B_bar;
-		MatrixXd _Q_bar;
-		MatrixXd _Q_root; 
-		MatrixXd _R_inv;
-		MatrixXd _R_root;
-
 	public:
 		const Measurements& Z;
 		const LssModel& M;
 
-		const MatrixXd I_n, I_m;
-		const MatrixXd R_inv, A_bar, B_bar, Q_bar, Q_root, R_root;
+		const MatrixXd _I_n, _I_m;
+		MatrixXd _R_inv, A_bar, B_bar, Q_bar, Q_root, R_root;
 
 		Kalman(Measurements &Z, LssModel &M);
 

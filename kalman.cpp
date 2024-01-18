@@ -7,8 +7,7 @@
 #include "kalman.hpp"
 
 
-Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y)
-	: U(U), Y(Y)
+Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y): U(U), Y(Y)
 {
 	// ToDo: Check on length N
 	std::cout << "Inside class Measurements." << std::endl;
@@ -31,8 +30,7 @@ LssModel::LssModel(
 	const MatrixXd S,
 	const VectorXd x0,
 	const MatrixXd P0
-)
-	: A(A), B(B), C(C), D(D), P(P), Q(Q), R(R), S(S), x0(x0), P0(P0)
+): A(A), B(B), C(C), D(D), P(P), Q(Q), R(R), S(S), x0(x0), P0(P0)
 {
 	n = A.rows();
 	p = B.cols();
@@ -60,28 +58,18 @@ LtissModel::LtissModel(
 	// ToDo: Checks on dimensions 
 }
 
-Kalman::Kalman(Measurements &Z, LssModel &M) :
-	Z(Z),
+Kalman::Kalman(Measurements &Z, LssModel &M) 
+:	Z(Z),
 	M(M),
-	I_n(MatrixXd::Identity(M.n, M.n)),
-	I_m(MatrixXd::Identity(M.m, M.m)),
-	R_inv(M.R.ldlt().solve(I_m)), // ldlt or llt?
-	A_bar(M.A - M.S*R_inv*M.C),
-	B_bar(M.B - M.S*R_inv*M.D),
-	Q_bar(M.Q - M.S*R_inv*M.S.transpose()),
-	Q_root(M.Q.llt().matrixL()),   // robust Cholesky?
-	R_root(M.R.llt().matrixL()),   // robust Cholesky?
-
 	_I_n(MatrixXd::Identity(M.n, M.n)),
-	_I_m(MatrixXd::Identity(M.m, M.m))
-	{
- 		_R_inv = M.R.ldlt().solve(_I_m); // ldlt or llt?
-		_A_bar = M.A - M.S*_R_inv*M.C;
-		_B_bar = M.B - M.S*_R_inv*M.D;
-		_Q_bar = M.Q - M.S*_R_inv*M.S.transpose();
-		_Q_root = M.Q.llt().matrixL();   // robust Cholesky?
-		_R_root = M.R.llt().matrixL();   // robust Cholesky?
-	}
+	_I_m(MatrixXd::Identity(M.m, M.m)),
+	_R_inv(M.R.ldlt().solve(_I_m)), // ldlt or llt?
+	A_bar(M.A - M.S*_R_inv*M.C),
+	B_bar(M.B - M.S*_R_inv*M.D),
+	Q_bar(M.Q - M.S*_R_inv*M.S.transpose()),
+	Q_root(M.Q.llt().matrixL()),   // robust Cholesky?
+	R_root(M.R.llt().matrixL())   // robust Cholesky?
+{}
 
 std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y)
 {
@@ -109,13 +97,13 @@ std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, Matr
 
 	// BSR: the block matrix [B_bar S*R_inv]
 	BSR.block(0, 0, n, p) = B_bar;
-	BSR.block(0, p, n, m) = M.S*R_inv;
+	BSR.block(0, p, n, m) = M.S*_R_inv;
 
 	z.head(p) = u;
 	z.segment(p, m) = y;
 
 	K = (M.C*Pp_root*Pp_root.transpose()*M.C.transpose() + M.R).llt().solve(M.C*Pp_root*Pp_root.transpose()).transpose();
-	xf = (I_n - K * M.C)*(A_bar*xf + BSR * z) + K * (y - M.D*u);
+	xf = (_I_n - K * M.C)*(A_bar*xf + BSR * z) + K * (y - M.D*u);
 
 	//Pf
 	MatrixXd QR2(m + n, m + n);
