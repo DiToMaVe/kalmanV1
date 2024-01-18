@@ -51,11 +51,12 @@ LtissModel::LtissModel(
 	MatrixXd& S,
 	VectorXd& x0,
 	MatrixXd& P0
-): A_(&A), B_(&B), C_(&C), D_(&D), P_(&P), Q_(&Q), R_(&R), S_(&S), x0_(&x0), P0_(&P0)
+): _A(&A), _B(&B), _C(&C), _D(&D), _P(&P), _Q(&Q), _R(&R), _S(&S), _x0(&x0), _P0(&P0)
 {
 	n = A.rows();
 	p = B.cols();
 	m = C.rows();
+
 	// ToDo: Checks on dimensions 
 }
 

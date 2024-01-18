@@ -110,16 +110,25 @@ class LtissModel{
 	P1(n, n)
 	*/
 	private:
-		VectorXd* x0_; 
-		MatrixXd* A_;
-		MatrixXd* B_;
-		MatrixXd* C_;
-		MatrixXd* D_;
-		MatrixXd* P_;
-		MatrixXd* Q_;
-		MatrixXd* R_;
-		MatrixXd* S_;
-		MatrixXd* P0_;
+		VectorXd* _x0; 
+		MatrixXd* _A;
+		MatrixXd* _B;
+		MatrixXd* _C;
+		MatrixXd* _D;
+		MatrixXd* _P;
+		MatrixXd* _Q;
+		MatrixXd* _R;
+		MatrixXd* _S;
+		MatrixXd* _P0;
+				
+		// MatrixXd _I_n, _I_m;
+		// MatrixXd* _R_inv; 
+	 	// MatrixXd* _A_bar;
+		// MatrixXd* _B_bar;
+		// MatrixXd* _Q_bar;
+		// MatrixXd* _Q_root;
+		// MatrixXd* _R_root;
+		
 	public:
 		int n, p, m;
 		LtissModel(
@@ -134,19 +143,33 @@ class LtissModel{
 			VectorXd& x0,
 			MatrixXd& P0
 		);
-		VectorXd& x0() {return *x0_;};
-		MatrixXd& A() {return *A_;};
-		MatrixXd& B() {return *B_;};
-		MatrixXd& C() {return *C_;};
-		MatrixXd& D() {return *D_;};
-		MatrixXd& P() {return *P_;};
-		MatrixXd& Q() {return *Q_;};
-		MatrixXd& R() {return *R_;};
-		MatrixXd& S() {return *S_;};
-		MatrixXd& P0() {return *P0_;};
+		VectorXd& x0() {return *_x0;};
+		MatrixXd& A() {return *_A;};
+		MatrixXd& B() {return *_B;};
+		MatrixXd& C() {return *_C;};
+		MatrixXd& D() {return *_D;};
+		MatrixXd& P() {return *_P;};
+		MatrixXd& Q() {return *_Q;};
+		MatrixXd& R() {return *_R;};
+		MatrixXd& S() {return *_S;};
+		MatrixXd& P0() {return *_P0;};
 };
 
 class Kalman {
+
+	private:
+		Observations* _Z;
+		LtissModel* _M;
+
+		// MatrixXd _I_n, _I_m;
+		// MatrixXd* _A_bar;
+		// MatrixXd* _B_bar;
+		// MatrixXd* _Q_bar;
+		// MatrixXd* _Q_root; 
+		// MatrixXd* _R_inv;
+		// MatrixXd* _R_root;
+		
+
 
 	public:
 		const Measurements& Z;
@@ -161,3 +184,31 @@ class Kalman {
 
 		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, LssModel &M);
 }; 
+
+// class KalmanV1 {
+
+// 	private:
+// 		Observations* _Z;
+// 		LtissModel* _M;
+
+// 		MatrixXd _I_n, _I_m;
+// 		MatrixXd* _A_bar;
+// 		MatrixXd* _B_bar;
+// 		MatrixXd* _Q_bar;
+// 		MatrixXd* _Q_root; 
+// 		MatrixXd* _R_inv;
+// 		MatrixXd* _R_root;
+		
+// 		MatrixXd I_n, I_m;
+// 		MatrixXd  A_bar, B_bar, Q_bar, Q_root, R_root, R_inv;
+
+// 	public:
+// 		const Measurements& Z;
+// 		const LssModel& M;
+
+// 		Kalman(Measurements &Z, LssModel &M);
+
+// 		std::tuple<VectorXd, VectorXd, MatrixXd> kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y);
+
+// 		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, LssModel &M);
+// }; 
