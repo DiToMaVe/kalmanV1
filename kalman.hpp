@@ -161,15 +161,13 @@ class Kalman {
 		Observations* _Z;
 		LtissModel* _M;
 
-		// MatrixXd _I_n, _I_m;
-		// MatrixXd* _A_bar;
-		// MatrixXd* _B_bar;
-		// MatrixXd* _Q_bar;
-		// MatrixXd* _Q_root; 
-		// MatrixXd* _R_inv;
-		// MatrixXd* _R_root;
-		
-
+		MatrixXd _I_n, _I_m;
+		MatrixXd _A_bar;
+		MatrixXd _B_bar;
+		MatrixXd _Q_bar;
+		MatrixXd _Q_root; 
+		MatrixXd _R_inv;
+		MatrixXd _R_root;
 
 	public:
 		const Measurements& Z;
@@ -184,31 +182,3 @@ class Kalman {
 
 		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, LssModel &M);
 }; 
-
-// class KalmanV1 {
-
-// 	private:
-// 		Observations* _Z;
-// 		LtissModel* _M;
-
-// 		MatrixXd _I_n, _I_m;
-// 		MatrixXd* _A_bar;
-// 		MatrixXd* _B_bar;
-// 		MatrixXd* _Q_bar;
-// 		MatrixXd* _Q_root; 
-// 		MatrixXd* _R_inv;
-// 		MatrixXd* _R_root;
-		
-// 		MatrixXd I_n, I_m;
-// 		MatrixXd  A_bar, B_bar, Q_bar, Q_root, R_root, R_inv;
-
-// 	public:
-// 		const Measurements& Z;
-// 		const LssModel& M;
-
-// 		Kalman(Measurements &Z, LssModel &M);
-
-// 		std::tuple<VectorXd, VectorXd, MatrixXd> kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y);
-
-// 		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, LssModel &M);
-// }; 

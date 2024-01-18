@@ -70,8 +70,18 @@ Kalman::Kalman(Measurements &Z, LssModel &M) :
 	B_bar(M.B - M.S*R_inv*M.D),
 	Q_bar(M.Q - M.S*R_inv*M.S.transpose()),
 	Q_root(M.Q.llt().matrixL()),   // robust Cholesky?
-	R_root(M.R.llt().matrixL())   // robust Cholesky?
-{}
+	R_root(M.R.llt().matrixL()),   // robust Cholesky?
+
+	_I_n(MatrixXd::Identity(M.n, M.n)),
+	_I_m(MatrixXd::Identity(M.m, M.m))
+	{
+ 		_R_inv = M.R.ldlt().solve(_I_m); // ldlt or llt?
+		_A_bar = M.A - M.S*_R_inv*M.C;
+		_B_bar = M.B - M.S*_R_inv*M.D;
+		_Q_bar = M.Q - M.S*_R_inv*M.S.transpose();
+		_Q_root = M.Q.llt().matrixL();   // robust Cholesky?
+		_R_root = M.R.llt().matrixL();   // robust Cholesky?
+	}
 
 std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y)
 {
