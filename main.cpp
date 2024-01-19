@@ -65,7 +65,7 @@ int main()
 	std::cout << "Observations.U():" << O.U() << std::endl;
     std::cout << "Observations.Y():" << O.Y() << std::endl;
 
-	LssModel M(A, B, C, D, P0, Q, R, S, x0, P0);
+	const LssModel M(A, B, C, D, P0, Q, R, S, x0, P0);
 
 	std::vector<VectorXd> gainSequence;
 	std::vector<VectorXd> stateSequence;
