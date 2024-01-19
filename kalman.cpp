@@ -64,12 +64,22 @@ Kalman::Kalman(Measurements &Z, LssModel &M)
 	_I_n(MatrixXd::Identity(M.n, M.n)),
 	_I_m(MatrixXd::Identity(M.m, M.m)),
 	_R_inv(M.R.ldlt().solve(_I_m)), // ldlt or llt?
-	A_bar(M.A - M.S*_R_inv*M.C),
-	B_bar(M.B - M.S*_R_inv*M.D),
-	Q_bar(M.Q - M.S*_R_inv*M.S.transpose()),
-	Q_root(M.Q.llt().matrixL()),   // robust Cholesky?
-	R_root(M.R.llt().matrixL())   // robust Cholesky?
+	_A_bar(M.A - M.S*_R_inv*M.C),
+	_B_bar(M.B - M.S*_R_inv*M.D),
+	_Q_bar(M.Q - M.S*_R_inv*M.S.transpose()),
+	_Q_root(M.Q.llt().matrixL()),   // robust Cholesky?
+	_R_root(M.R.llt().matrixL())   // robust Cholesky?
 {}
+
+void Kalman::updateAuxMatrices(LtissModel& M)
+{
+	// _R_inv = M.R.ldlt().solve(_I_m); // ldlt or llt?
+	// _A_bar = M.A - M.S*_R_inv*M.C;
+	// _B_bar = M.B - M.S*_R_inv*M.D;
+	// _Q_bar = M.Q - M.S*_R_inv*M.S.transpose();
+	// _Q_root = M.Q.llt().matrixL();   // robust Cholesky?
+	// _R_root = M.R.llt().matrixL();   // robust Cholesky?
+}
 
 std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y)
 {
@@ -82,8 +92,8 @@ std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, Matr
 	MatrixXd QR1(2 * n, n);
 	MatrixXd QR1_Q(2 * n, 2 * n);
 	MatrixXd QR1_R(2 * n, n);
-	QR1.block(0, 0, n, n) = Pf_root.transpose()*A_bar.transpose();
-	QR1.block(n, 0, n, n) = Q_root.transpose();
+	QR1.block(0, 0, n, n) = Pf_root.transpose()*_A_bar.transpose();
+	QR1.block(n, 0, n, n) = _Q_root.transpose();
 
 	Eigen::HouseholderQR<MatrixXd> qr1(QR1);
 	QR1_R = qr1.matrixQR().triangularView<Eigen::Upper>();
@@ -96,21 +106,21 @@ std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, Matr
 	VectorXd z(m + p);
 
 	// BSR: the block matrix [B_bar S*R_inv]
-	BSR.block(0, 0, n, p) = B_bar;
+	BSR.block(0, 0, n, p) = _B_bar;
 	BSR.block(0, p, n, m) = M.S*_R_inv;
 
 	z.head(p) = u;
 	z.segment(p, m) = y;
 
 	K = (M.C*Pp_root*Pp_root.transpose()*M.C.transpose() + M.R).llt().solve(M.C*Pp_root*Pp_root.transpose()).transpose();
-	xf = (_I_n - K * M.C)*(A_bar*xf + BSR * z) + K * (y - M.D*u);
+	xf = (_I_n - K * M.C)*(_A_bar*xf + BSR * z) + K * (y - M.D*u);
 
 	//Pf
 	MatrixXd QR2(m + n, m + n);
 	MatrixXd QR2_Q(m + n, m + n);
 	MatrixXd QR2_R(m + n, m + n);
 
-	QR2.block(0, 0, m, m) = R_root;
+	QR2.block(0, 0, m, m) = _R_root;
 	QR2.block(0, m, m, n) = M.C*Pp_root;
 	QR2.block(m, m, n, n) = Pp_root;
 

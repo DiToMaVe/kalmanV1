@@ -165,8 +165,12 @@ class Kalman {
 		const Measurements& Z;
 		const LssModel& M;
 
-		const MatrixXd _I_n, _I_m;
-		MatrixXd _R_inv, A_bar, B_bar, Q_bar, Q_root, R_root;
+		MatrixXd _I_n, _I_m;
+		MatrixXd _R_inv, _A_bar, _B_bar, _Q_bar, _Q_root, _R_root;
+
+		LtissModel& _Md() {return *_M;};
+		void setModel(LtissModel &M) {updateAuxMatrices(M);};
+		void updateAuxMatrices(LtissModel& M);
 
 		Kalman(Measurements &Z, LssModel &M);
 
