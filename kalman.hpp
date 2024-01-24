@@ -4,10 +4,11 @@
 
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
+using Eigen::MatrixBase;
 
 #pragma once
 
-class Measurements{
+class ObservationsV1{
 	/*
 	Z: the data structure containing the measured outputs in Z.y and 
 	possibly the measured inputs in Z.u. If the number of data
@@ -17,7 +18,7 @@ class Measurements{
 	// ToDo: Assess final choice N x ... or ... x N
 	public:
 		const Eigen::MatrixXd U, Y;
-		Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y);
+		ObservationsV1(const Eigen::MatrixXd U, const Eigen::MatrixXd Y);
 };
 
 class Observations{
@@ -29,12 +30,12 @@ class Observations{
 	matrix.*/
 	// ToDo: Assess final choice N x ... or ... x N	
 	private:
-		MatrixXd* U_;
-		MatrixXd* Y_;
+		const MatrixXd* U_;
+		const MatrixXd* Y_;
 	public:
-    	Observations(MatrixXd& U, MatrixXd& Y);
-		MatrixXd& U() {return *U_;};
-		MatrixXd& Y() {return *Y_;};
+    	Observations(const MatrixXd& U, const MatrixXd& Y): U_{&U}, Y_{&Y}{};
+		const MatrixXd& U() const {return *U_;};
+		const MatrixXd& Y() const {return *Y_;};
 };
 
 class LssModel {
@@ -110,68 +111,86 @@ class LtissModel{
 	P1(n, n)
 	*/
 	private:
-		VectorXd* _x0; 
-		MatrixXd* _A;
-		MatrixXd* _B;
-		MatrixXd* _C;
-		MatrixXd* _D;
-		MatrixXd* _P;
-		MatrixXd* _Q;
-		MatrixXd* _R;
-		MatrixXd* _S;
-		MatrixXd* _P0;
-				
-		// MatrixXd _I_n, _I_m;
-		// MatrixXd* _R_inv; 
-	 	// MatrixXd* _A_bar;
-		// MatrixXd* _B_bar;
-		// MatrixXd* _Q_bar;
-		// MatrixXd* _Q_root;
-		// MatrixXd* _R_root;
+		const VectorXd* _x0; 
+		const MatrixXd* _A;
+		const MatrixXd* _B;
+		const MatrixXd* _C;
+		const MatrixXd* _D;
+		const MatrixXd* _P;
+		const MatrixXd* _Q;
+		const MatrixXd* _R;
+		const MatrixXd* _S;
+		const MatrixXd* _P0;
 		
 	public:
 		int n, p, m;
 		LtissModel(
-			MatrixXd& A,
-			MatrixXd& B,
-			MatrixXd& C,
-			MatrixXd& D,
-			MatrixXd& P,
-			MatrixXd& Q,
-			MatrixXd& R,
-			MatrixXd& S,
-			VectorXd& x0,
-			MatrixXd& P0
+			const MatrixXd& A,
+			const MatrixXd& B,
+			const MatrixXd& C,
+			const MatrixXd& D,
+			const MatrixXd& P,
+			const MatrixXd& Q,
+			const MatrixXd& R,
+			const MatrixXd& S,
+			const VectorXd& x0,
+			const MatrixXd& P0
 		);
-		VectorXd& x0() {return *_x0;};
-		MatrixXd& A() {return *_A;};
-		MatrixXd& B() {return *_B;};
-		MatrixXd& C() {return *_C;};
-		MatrixXd& D() {return *_D;};
-		MatrixXd& P() {return *_P;};
-		MatrixXd& Q() {return *_Q;};
-		MatrixXd& R() {return *_R;};
-		MatrixXd& S() {return *_S;};
-		MatrixXd& P0() {return *_P0;};
+		const VectorXd& x0() {return *_x0;};
+		const MatrixXd& A() {return *_A;};
+		const MatrixXd& B() {return *_B;};
+		const MatrixXd& C() {return *_C;};
+		const MatrixXd& D() {return *_D;};
+		const MatrixXd& P() {return *_P;};
+		const MatrixXd& Q() {return *_Q;};
+		const MatrixXd& R() {return *_R;};
+		const MatrixXd& S() {return *_S;};
+		const MatrixXd& P0() {return *_P0;};
 };
 
 class Kalman {
 
 	private:
-		Observations* _Z;
-		LtissModel* _M;
+		// Observations* _Z;
+		// LtissModel* _M;
 
 	public:
-		const LssModel& M;
+		LssModel& M;
 
 		MatrixXd _I_n, _I_m;
 		MatrixXd _R_inv, _A_bar, _B_bar, _Q_bar, _Q_root, _R_root;
 
-		// LtissModel& _Md() {return *_M;};
+		// LtissModel& M() {return *_M;};
+		// Observations& Z() {return *_Z;};
 
-		Kalman(const LssModel& M);
+		Kalman(LssModel& M);
 
-		std::tuple<VectorXd, VectorXd, MatrixXd> kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y);
+		std::tuple<VectorXd, VectorXd, MatrixXd> update(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y);
 
-		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(Measurements &Z, const LssModel& M);
+		static std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> kf(const Observations& Z, LssModel& M);
 }; 
+
+class TestModel{
+	// private:
+	// 	const MatrixXd* _A;
+	public:
+		const MatrixXd* _A;
+		TestModel(const MatrixXd &A) : _A(&A) {}
+		constexpr auto A() const -> const MatrixXd& {return *_A;};
+};
+
+class TestTemplate{
+	// private:
+	// 	const MatrixXd* _A;
+	public:
+		template <typename Derived>
+		TestTemplate(const MatrixBase<Derived>& A){
+			std::cout << "Address A:" << &A << std::endl;
+		};
+		// TestTemplate(MatrixXd& A): _A(&A){};
+		// MatrixXd& A() {return *_A;};
+};
+
+
+
+

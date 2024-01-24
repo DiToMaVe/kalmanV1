@@ -6,8 +6,10 @@
 
 #include "kalman.hpp"
 
+using Eigen::MatrixBase;
 
-Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y): U(U), Y(Y)
+
+ObservationsV1::ObservationsV1(const Eigen::MatrixXd U, const Eigen::MatrixXd Y): U(U), Y(Y)
 {
 	// ToDo: Check on length N
 	std::cout << "Inside class Measurements." << std::endl;
@@ -15,9 +17,6 @@ Measurements::Measurements(const Eigen::MatrixXd U, const Eigen::MatrixXd Y): U(
     std::cout << "Address Y:" << Y.data() << std::endl;
 
 }
-
-Observations::Observations(MatrixXd& U, MatrixXd& Y): U_{&U}, Y_{&Y}{}
-
 
 LssModel::LssModel(
 	const MatrixXd A,
@@ -39,26 +38,26 @@ LssModel::LssModel(
 }
 
 LtissModel::LtissModel(
-	MatrixXd& A,
-	MatrixXd& B,
-	MatrixXd& C,
-	MatrixXd& D,
-	MatrixXd& P,
-	MatrixXd& Q,
-	MatrixXd& R,
-	MatrixXd& S,
-	VectorXd& x0,
-	MatrixXd& P0
-): _A(&A), _B(&B), _C(&C), _D(&D), _P(&P), _Q(&Q), _R(&R), _S(&S), _x0(&x0), _P0(&P0)
+	const MatrixXd& A,
+	const MatrixXd& B,
+	const MatrixXd& C,
+	const MatrixXd& D,
+	const MatrixXd& P,
+	const MatrixXd& Q,
+	const MatrixXd& R,
+	const MatrixXd& S,
+	const VectorXd& x0,
+	const MatrixXd& P0
+)
+: _A(&A), _B(&B), _C(&C), _D(&D), _P(&P), _Q(&Q), _R(&R), _S(&S), _x0(&x0), _P0(&P0)
 {
 	n = A.rows();
 	p = B.cols();
 	m = C.rows();
-
 	// ToDo: Checks on dimensions 
 }
 
-Kalman::Kalman(const LssModel& M) 
+Kalman::Kalman(LssModel& M) 
 :	M(M),
 	_I_n(MatrixXd::Identity(M.n, M.n)),
 	_I_m(MatrixXd::Identity(M.m, M.m)),
@@ -70,7 +69,7 @@ Kalman::Kalman(const LssModel& M)
 	_R_root(M.R.llt().matrixL())   // robust Cholesky?
 {}
 
-std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y)
+std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::update(VectorXd &xf, MatrixXd &Pf_root, VectorXd &u, VectorXd &y)
 {
 	// System
 	int n = M.n;
@@ -121,10 +120,10 @@ std::tuple<VectorXd, VectorXd, MatrixXd> Kalman::kalmanUpdate(VectorXd &xf, Matr
 	return std::make_tuple(K, xf, Pf_root);
 }
 
-std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> Kalman::kf(Measurements &Z, const LssModel& M)
+std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> Kalman::kf(const Observations& Z, LssModel& M)
 {
 	Kalman kalmanObj(M);
-	int N = Z.Y.rows();
+	int N = Z.Y().rows();
 	std::vector<VectorXd> gainSequence;
 	std::vector<VectorXd> stateSequence;
 	std::vector<MatrixXd> covSequence;
@@ -134,9 +133,9 @@ std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> 
 	MatrixXd Pf_root = M.P0.llt().matrixL();
 	for (int ii = 0; ii < N; ii++)
 	{
-		VectorXd u = Z.U.row(ii).transpose();
-		VectorXd y = Z.Y.row(ii).transpose();
-		std::tie(K, xf, Pf_root) = kalmanObj.kalmanUpdate(xf, Pf_root, u, y);
+		VectorXd u = Z.U().row(ii).transpose();
+		VectorXd y = Z.Y().row(ii).transpose();
+		std::tie(K, xf, Pf_root) = kalmanObj.update(xf, Pf_root, u, y);
 
 		gainSequence.push_back(K);
 		stateSequence.push_back(xf);
@@ -144,3 +143,4 @@ std::tuple<std::vector<VectorXd>, std::vector<VectorXd>, std::vector<MatrixXd>> 
 	}
 	return std::make_tuple(gainSequence, stateSequence, covSequence);
 }
+
